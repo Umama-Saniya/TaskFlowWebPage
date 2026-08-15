@@ -29,6 +29,7 @@ app.add_middleware(
         "http://localhost:5501",
         "http://127.0.0.1:5173",
         "http://localhost:5173",
+        "https://umama-saniya.github.io",
         "null",  # allows opening index.html directly via file:// while testing
     ],
     allow_credentials=True,
