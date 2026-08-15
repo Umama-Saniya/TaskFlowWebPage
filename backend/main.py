@@ -10,28 +10,17 @@ import models
 import schemas
 from database import Base, SessionLocal, engine
 
-# Create tables on startup (SQLite file persists between restarts)
+# Create tables on startup
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="TaskFlow API", version="2.1.0")
 
 # =========================================================
-# CORS — add any extra local dev origins you use here
+# CORS
 # =========================================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:3000",
-        "http://localhost:3000",
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://127.0.0.1:5501",
-        "http://localhost:5501",
-        "http://127.0.0.1:5173",
-        "http://localhost:5173",
-        "https://umama-saniya.github.io",
-        "null",  # allows opening index.html directly via file:// while testing
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -77,7 +66,6 @@ def get_current_user(
 
 
 def get_owned_task(task_id: int, current_user: models.User, db: Session) -> models.Task:
-    """Fetch a task and verify the current user owns it, or raise the right HTTP error."""
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -173,7 +161,7 @@ def get_task(
     return get_owned_task(task_id, current_user, db)
 
 
-# UPDATE — partial update (title, category, priority, due_date, and/or status)
+# UPDATE — partial update
 @app.patch("/tasks/{task_id}", response_model=schemas.TaskResponse)
 def update_task(
     task_id: int,
@@ -183,7 +171,7 @@ def update_task(
 ):
     task = get_owned_task(task_id, current_user, db)
 
-    for field, value in task_update.dict(exclude_unset=True).items():
+    for field, value in task_update.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
 
     db.commit()
@@ -206,8 +194,7 @@ def delete_task(
 
 
 # =========================================================
-# AI ASSISTANT (rule-based demo assistant — swap in a real
-# LLM API call here later if you want it to be smarter)
+# AI ASSISTANT
 # =========================================================
 @app.post("/ai", response_model=schemas.AIResponse)
 def ai_assistant(
@@ -224,3 +211,8 @@ def ai_assistant(
         reply = f'Got it — you said: "{data.prompt}". Ask me about your tasks anytime!'
 
     return {"response": reply}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
