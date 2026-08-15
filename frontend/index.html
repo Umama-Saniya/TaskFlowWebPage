@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Operations Engineering</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body class="theme-dark">
+  <div class="app-container">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="logo-area">
+          <div class="logo-icon">T</div>
+          <div>
+            <h2>TaskFlow</h2>
+            <span>Ops Engineering</span>
+          </div>
+        </div>
+
+        <nav class="main-menu">
+          <span class="menu-label">MAIN MENU</span>
+          <a href="#" class="menu-item active" data-nav="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+          <a href="#" class="menu-item" data-open-modal="scheduleModal"><i class="fa-solid fa-calendar-days"></i> Schedule</a>
+          <a href="#" class="menu-item" data-open-modal="privacyModal"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+          <a href="#" id="ai-menu-btn" class="menu-item"><i class="fa-solid fa-robot"></i> AI Assistant</a>
+        </nav>
+      </div>
+
+      <div class="user-profile">
+        <div class="avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <h4 id="userNameDisplay">Guest User</h4>
+          <span id="userStatusLabel">Logged Out</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+
+      <header class="top-header">
+        <div class="header-status animated-box">
+          <span class="status-dot"></span> Live (Connected)
+        </div>
+
+        <div class="header-actions">
+          <div class="theme-selector animated-box">
+            <i class="fa-solid fa-palette"></i>
+            <select id="themeSelect">
+              <option value="theme-dark" selected>🌙 Dark Theme</option>
+              <option value="theme-light">☀️ Light Theme</option>
+            </select>
+          </div>
+          <button id="authBtn" class="logout-btn animated-box">
+            <i class="fa-solid fa-right-from-bracket"></i> <span id="authBtnText">Login</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="welcome-banner animated-box" id="welcomeBanner">
+        <button class="close-banner-btn" id="closeBannerBtn">&times;</button>
+        <span class="banner-sub">Task Flow Notification System</span>
+        <h1 id="welcomeHeading">GRAND WELCOME, GUEST!</h1>
+        <p>Manage your workload efficiently and stay organized.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card animated-box">
+          <div><span>Total Tasks</span><h2 id="totalTasksCount">0</h2></div>
+          <div class="stat-icon icon-blue"><i class="fa-solid fa-list-check"></i></div>
+        </div>
+        <div class="stat-card animated-box">
+          <div><span>Pending</span><h2 id="pendingTasksCount">0</h2></div>
+          <div class="stat-icon icon-amber"><i class="fa-solid fa-hourglass-half"></i></div>
+        </div>
+        <div class="stat-card animated-box">
+          <div><span>In Progress</span><h2 id="inProgressTasksCount">0</h2></div>
+          <div class="stat-icon icon-cyan"><i class="fa-solid fa-spinner"></i></div>
+        </div>
+        <div class="stat-card animated-box">
+          <div><span>Completed</span><h2 id="completedTasksCount">0</h2></div>
+          <div class="stat-icon icon-green"><i class="fa-solid fa-circle-check"></i></div>
+        </div>
+      </div>
+
+      <section class="task-section animated-box">
+        <div class="task-section-header">
+          <div>
+            <h2>Task Management</h2>
+            <p>View, update, and manage your current workload</p>
+          </div>
+          <div class="task-controls">
+            <select id="categoryFilter">
+              <option value="all">All Categories</option>
+              <option value="WORK">WORK</option>
+              <option value="CODE">CODE</option>
+              <option value="DESIGN">DESIGN</option>
+              <option value="AI-BOT">AI-BOT</option>
+            </select>
+            <select id="statusFilter">
+              <option value="all">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+            <button class="new-task-btn animated-box" id="newTaskBtn">+ New Task</button>
+          </div>
+        </div>
+
+        <div class="table-headers">
+          <span style="flex: 2;">Task Title &amp; Category</span>
+          <span style="flex: 1;">Priority</span>
+          <span style="flex: 1;">Due Date</span>
+          <span style="flex: 1.5;">Progress</span>
+          <span style="flex: 1; text-align: right;">Status Action</span>
+        </div>
+
+        <div id="taskList" class="task-list"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- WELCOME OVERLAY -->
+  <div id="welcomeOverlay" class="golden-welcome-overlay">
+    <div class="dark-orbit-card">
+      <div class="gold-ring-orbit"></div>
+      <div class="dark-card-content">
+        <h1 id="overlayTitle">WELCOME BACK,<br><span id="overlayName"></span></h1>
+        <p id="overlaySubtext">Ready to conquer your tasks?</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT TASK MODAL -->
+  <div id="taskModalOverlay" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="taskModalTitle"><i class="fa-solid fa-calendar-plus"></i> Create &amp; Schedule Task</h3>
+        <button class="modal-close" data-close-modal="taskModalOverlay">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editingTaskId" value="" />
+
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" id="manualTitle" placeholder="Enter task description..." />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="manualCategory">
+              <option value="WORK">WORK</option>
+              <option value="CODE">CODE</option>
+              <option value="DESIGN">DESIGN</option>
+              <option value="AI-BOT">AI-BOT</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="manualPriority">
+              <option value="HIGH">HIGH</option>
+              <option value="MEDIUM" selected>MEDIUM</option>
+              <option value="LOW">LOW</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fa-regular fa-calendar"></i> Select Date</label>
+            <input type="date" id="manualDueDate" />
+          </div>
+          <div class="form-group">
+            <label><i class="fa-regular fa-clock"></i> Schedule Time</label>
+            <input type="time" id="manualDueTime" value="10:00" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" data-close-modal="taskModalOverlay">Cancel</button>
+        <button class="save-task-btn" id="saveTaskBtn">Save Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN / REGISTER MODAL -->
+  <div id="authModalOverlay" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="authModalTitle"><i class="fa-solid fa-user-lock"></i> Account Access</h3>
+        <button class="modal-close" data-close-modal="authModalOverlay">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs">
+          <button id="tabLogin" class="tab-btn active" data-auth-tab="login">Login</button>
+          <button id="tabRegister" class="tab-btn" data-auth-tab="register">Register</button>
+        </div>
+
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="authUsername" placeholder="Enter your username" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="authPassword" placeholder="Enter password" autocomplete="current-password" />
+        </div>
+        <p id="authErrorMsg" class="auth-error" style="display:none;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" data-close-modal="authModalOverlay">Cancel</button>
+        <button class="save-task-btn" id="authSubmitBtn">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE MODAL -->
+  <div id="scheduleModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-calendar-days"></i> Task Schedule View</h3>
+        <button class="modal-close" data-close-modal="scheduleModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Here's an overview of your scheduled tasks:</p>
+        <div id="scheduleContainer" style="margin-top: 15px; font-size: 13px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" data-close-modal="scheduleModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIVACY POLICY MODAL -->
+  <div id="privacyModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-shield-halved"></i> Privacy Policy</h3>
+        <button class="modal-close" data-close-modal="privacyModal">&times;</button>
+      </div>
+      <div class="modal-body" style="font-size: 13px; line-height: 1.6;">
+        <p><strong>TaskFlow Workspace v2.1 Privacy Guarantee:</strong></p>
+        <p>1. Your task data is stored securely on our backend, tied to your account only.</p>
+        <p>2. We never share your personal information with third parties.</p>
+        <p>3. Passwords are stored using industry-standard hashing — never in plain text.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" data-close-modal="privacyModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI ASSISTANT PANEL -->
+  <div id="ai-modal" class="ai-panel">
+    <div class="ai-panel-header">
+      <h4><i class="fa-solid fa-robot"></i> TaskFlow AI</h4>
+      <button id="close-ai-btn" class="ai-close-btn">✖</button>
+    </div>
+
+    <div id="ai-chat-box" class="ai-chat-box">
+      <p class="ai-placeholder">Hi! Ask me anything about your tasks or productivity...</p>
+    </div>
+
+    <div class="ai-input-row">
+      <input type="text" id="ai-input" placeholder="Ask AI something..." />
+      <button id="send-ai-btn">Send</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
