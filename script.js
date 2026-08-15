@@ -2,7 +2,7 @@
 // API CONFIGURATION
 // =========================================================
 
-const API_BASE_URL = "https://taskflowwebpage-2.onrender.com";
+const API_URL = "https://taskflowwebpage-2.onrender.com";
 
 // =========================================================
 // STATE
